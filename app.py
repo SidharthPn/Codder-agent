@@ -69,4 +69,24 @@ if generate:
 
     status_placeholder.success("✅ Project Generated Successfully!")
 
+    import os
+    import shutil
+    project_dir = "generated_project"
+    
+    if os.path.exists(project_dir):
+        st.subheader("🎉 Your project is ready!")
+        
+        # Create ZIP file for download
+        shutil.make_archive("generated_project", 'zip', project_dir)
+        with open("generated_project.zip", "rb") as f:
+            st.download_button(
+                label="📥 Download Project (ZIP)",
+                data=f,
+                file_name="generated_project.zip",
+                mime="application/zip",
+                use_container_width=True
+            )
+            
+        st.info("💻 **To run locally:**\n1. Extract the ZIP\n2. Open terminal in the extracted folder\n3. Run `python -m http.server 8000` (for HTML/JS projects)\n4. Open `http://localhost:8000` in your browser.")
+
     output_placeholder.json(result)

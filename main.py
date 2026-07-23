@@ -7,18 +7,13 @@ from agent.graph import agent
 
 def main():
     parser = argparse.ArgumentParser(description="Run engineering project planner")
-    parser.add_argument(
-        "--recursion-limit",
-        "-r",
-        type=int,
-        default=100,
-        help="Recursion limit for processing (default: 100)",
-    )
+    parser.add_argument("--recursion-limit", "-r", type=int, default=100,
+                        help="Recursion limit for processing (default: 100)")
 
     args = parser.parse_args()
 
     try:
-        user_prompt = input("Enter your project prompt: ")
+        user_prompt = input("Enter your project prompt: ").strip()
         result = agent.invoke(
             {"user_prompt": user_prompt}, {"recursion_limit": args.recursion_limit}
         )

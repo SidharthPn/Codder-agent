@@ -1,0 +1,26 @@
+.password-display {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.generate-button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.generate-button:hover {
+    background-color: #3e8e41;
+}
+
+.password-length-input {
+    width: 50px;
+    height: 20px;
+    font-size: 16px;
+    padding: 5px;
+    margin-right: 10px;
+}

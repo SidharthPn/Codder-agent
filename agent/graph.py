@@ -1,5 +1,4 @@
-from asyncio import current_task
-
+import time
 from dotenv import load_dotenv
 from langchain_core.globals import set_verbose, set_debug
 from langchain_groq.chat_models import ChatGroq
@@ -16,13 +15,16 @@ _ = load_dotenv()
 set_debug(True)
 set_verbose(True)
 
-llm = ChatGroq(model="openai/gpt-oss-120b")
+# Use a Llama 3 model which has excellent tool-calling support on Groq
+llm = ChatGroq(model="llama-3.3-70b-versatile")
 
 
 def planner_agent(state: dict) -> dict:
     """Converts user prompt into a structured Plan."""
     user_prompt = state["user_prompt"]
-    resp = llm.with_structured_output(Plan).invoke(planner_prompt(user_prompt))
+    resp = llm.with_structured_output(Plan).invoke(
+        planner_prompt(user_prompt)
+    )
     if resp is None:
         raise ValueError("Planner did not return a valid response.")
     return {"plan": resp}
@@ -62,26 +64,20 @@ def coder_agent(state: dict) -> dict:
         f"Existing content:\n{existing_content}\n"
         "Use write_file(path, content) to save your changes."
     )
-    
+
     coder_tools = [read_file, write_file, list_files, get_current_directory]
-    print("\n" + "=" * 80)
-    print("Current Task:")
-    print(current_task.task_description)
-    print("=" * 80)
-
-    print("File:", current_task.filepath)
-    print("Existing Content Length:", len(existing_content))
     react_agent = create_react_agent(llm, coder_tools)
-    
 
-    react_agent.invoke(
-        {
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ]
-        }
-    )
+    print(f"\nWaiting 15 seconds to avoid Groq Rate Limits... (Step {coder_state.current_step_idx + 1}/{len(steps)})")
+    time.sleep(15)
+
+    try:
+        react_agent.invoke({"messages": [{"role": "system", "content": system_prompt},
+                                         {"role": "user", "content": user_prompt}]})
+    except Exception as e:
+        print(f"\nAPI Error: {e}")
+        print("Saving current progress. Please wait a minute and re-run with the same project name to resume.")
+        raise e
 
     coder_state.current_step_idx += 1
     return {"coder_state": coder_state}
@@ -98,15 +94,13 @@ graph.add_edge("architect", "coder")
 graph.add_conditional_edges(
     "coder",
     lambda s: "END" if s.get("status") == "DONE" else "coder",
-    {"END": END, "coder": "coder"},
+    {"END": END, "coder": "coder"}
 )
 
 graph.set_entry_point("planner")
+
 agent = graph.compile()
 if __name__ == "__main__":
-    user_prompt = "Build a colourful modern todo app in html css and js"
-    result = agent.invoke(
-        {"user_prompt": user_prompt},
-        {"recursion_limit": 100},
-    )
+    result = agent.invoke({"user_prompt": "Build a colourful modern todo app in html css and js"},
+                          {"recursion_limit": 100})
     print("Final State:", result)

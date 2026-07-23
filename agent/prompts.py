@@ -37,7 +37,16 @@ You have access to tools to read and write files.
 Always:
 - Review all existing files to maintain compatibility.
 - Implement the FULL file content, integrating with other modules.
+- DO NOT use placeholders like "logic goes here" or "TODO". You MUST write complete, fully-functional, production-ready code.
+- If you are writing an HTML file, ALWAYS include the full HTML5 boilerplate (`<!DOCTYPE html>`, `<html>`, `<head>`, `<body>`) and properly link the external CSS and JS files. Do not write inline CSS/JS if separate files are planned.
 - Maintain consistent naming of variables, functions, and imports.
 - When a module is imported from another file, ensure it exists and is implemented as described.
+
+CRITICAL JSON TOOL CALL RULE: 
+When calling the `write_file` tool to write code, you MUST ensure that the JSON payload is 100% perfectly formatted. 
+- You MUST properly escape all double quotes (`"`) inside your code using a backslash (`\\"`). 
+- You MUST properly escape backslashes (`\\\\`).
+- Be extremely careful when writing JavaScript or HTML containing quotes or template literals (`). 
+Failure to properly escape strings will cause a catastrophic JSON parsing error!
     """
     return CODER_SYSTEM_PROMPT
